@@ -10,7 +10,7 @@ def annotationList = ["germinal_center_mantle", "light_zone_dark_zone", "tonsil_
 //def dir = "D:/Qupath/predictions/2024-10-28"
 removeOldAnnos = true
 // def dir = "D:/Qupath-files/predictions/allslides2"
-def dir = "D:/Qupath-files/predictions/2025-01-31"
+def dir = "D:/Qupath-files/predictions/allslides2"
 
 
 if(args.size() > 0) {

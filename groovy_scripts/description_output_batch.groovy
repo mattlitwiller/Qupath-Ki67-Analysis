@@ -7,12 +7,23 @@
  * 
  * @Author Matthew Litwiller
  */
+
+ import java.nio.file.*
  
  
  
 for (entry in project.getImageList()) {
     // Get the ImageData for each slide
     def imageData = entry.readImageData()
+    
+    def name = "- Ki-67 Assessment -"
+    // Remove all previous ki67 assessments
+    for (anno in getAnnotationObjects()) {
+        if(anno.getName().equals(name)) {
+            removeObject(anno, false)
+        }
+    }
+
     
     if (imageData == null) {
         println("Failed to load ImageData for: " + entry.getImageName())
@@ -32,8 +43,8 @@ for (entry in project.getImageList()) {
     if(t_a_presence) {
         desc += "OK - Tonsil/Appendix Tissue Present \n"
     }else {
-        desc += "ERROR - Tonsil & Appendix Tissues Missing \n" 
-        code = Math.max(code, 2)
+        desc += "WARN - Tonsil & Appendix Tissues Missing \n" 
+        code = Math.max(code, 1)
     }
 
     GC = annos.find{ a -> a.getPathClass().toString().equals("germinal_center")}
@@ -161,7 +172,34 @@ for (entry in project.getImageList()) {
     desc += "REQUIRED - Inspect Image for Defects in Control \n" 
     }
 
-    Project.getEntry(imageData).setDescription(desc)
+//    Project.getEntry(imageData).setDescription(desc)
+    
+    def hierarchy = imageData.getHierarchy()
+
+    // Create a small annotation
+    def roi = ROIs.createRectangleROI(0, 0, 0, 0, ImagePlane.getDefaultPlane())
+    def annotation = PathObjects.createAnnotationObject(roi)
+
+    // Add your text as metadata
+
+    annotation.setName(name)
+    annotation.setDescription(desc)
+    annotation.setLocked(true)
+
+    hierarchy.addObject(annotation)
+    fireHierarchyUpdate()
+
+
+
+    // Define the output file path (PWD)
+    def outputFilePath = Paths.get(System.getProperty("user.dir"), getCurrentImageName() + ".txt")
+
+    // Write the text to the file
+    Files.write(outputFilePath, desc.getBytes())
+
+    // Confirm the save location
+    println "Text saved to: ${outputFilePath}"
+
 
 
     

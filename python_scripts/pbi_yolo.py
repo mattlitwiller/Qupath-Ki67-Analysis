@@ -17,8 +17,11 @@ from datetime import datetime
 parser = argparse.ArgumentParser(description="Use model predictions on a slide image file.")
 parser.add_argument('image', type=str, help="The image file to process")
 parser.add_argument("detection_classes", type=str, default="germinal_center", help="The detection classes/folder (underscore joined)")
-parser.add_argument('downsample', type=int, default=4, help="The downsample used to export the jpg in QuPath")
+parser.add_argument('downsample', type=float, default=4, help="The downsample used to export the jpg in QuPath")
 parser.add_argument('size', type=int, default=0, help="Tile size (which will be divided by downsample)")
+parser.add_argument('model_dir', type=str, help="The model directory")
+parser.add_argument("project_dir", type=str, help="The QuPath project script directory")
+parser.add_argument("python_dir", type=str, help="The python script directory containing pbi_yolo.py")
 parser.add_argument('--batch_folder', type=str, required = False, default=None, help="Folder for batch processing")
 # parser.add_argument("--name", help="Disk name", required = False)
 
@@ -27,6 +30,9 @@ classes = args.detection_classes
 image_file = args.image
 downsample = args.downsample
 sz = args.size
+model_dir = args.model_dir
+project_dir = args.project_dir
+python_dir = args.python_dir
 batch_folder = args.batch_folder
 
 # Arbitrarily defined color scheme in RGB vals
@@ -39,12 +45,12 @@ colors = {
     "appendix": [96, 189, 208]
 }
 
-date = datetime.today().strftime('%Y-%m-%d')
-
 # Load the image 
-image_path = f"../jpg/downsample{downsample}/{image_file}"
+# image_path = f"../jpg/downsample{downsample}/{image_file}"
+downsample = int(float(image_file.split("_")[0]))
 if batch_folder is not None: 
-    image_path = f"../jpg/{batch_folder}/{image_file}"
+    image_path = f"{project_dir}/{batch_folder}/{image_file}"
+    print(f"image path {image_path}")
 img = cv2.imread(image_path)
 
 # tile downsample * tile size = 4 * 780 = 3120    
@@ -57,15 +63,11 @@ if(sz <= 0):
 else:
     size_x = int(2*sz / downsample)
     size_y = size_x
-# print(f"patch size: {size}")
 
-# export_dir = f"../YOLO_model/output/allslides"
-export_dir = f"../YOLO_model/output/{date}"
+export_dir = f"{project_dir}/output"
 if (not os.path.exists(export_dir)):
     os.mkdir(export_dir)
-yolo_model_path = f"../YOLO_model/{classes}/trained_yolo11n_{classes}.pt"
-
-# start = time.time()
+yolo_model_path = f"{model_dir}/{classes}/trained_yolo11n_{classes}.pt"
 
 x_off = 0
 y_off = 0
@@ -137,14 +139,11 @@ for i in range(len(classes_ids)):
 
     geojson_data["features"].append(feature)
 
-out_file = image_file.replace(" ", "_")
-save_dest = f'{export_dir}/{os.path.splitext(out_file)[0]}_{classes}.geojson'
+out_name = image_file.split("_", 1)[1].replace(" ", "_")
+out_file = f'{os.path.splitext(out_name)[0]}_{classes}.geojson'
+save_dest = f'{export_dir}/{out_file}'
 
 with open(save_dest, 'w') as f:
     json.dump(geojson_data, f, indent=4)
 
 print(f"Inference and conversion to GeoJSON complete! The new GeoJSON file is saved to {save_dest}")
-
-# end = time.time()
-# print(f"Time: {'{0:.1f}'.format(end-start)} secs")
-
