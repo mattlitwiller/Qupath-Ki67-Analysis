@@ -7,12 +7,14 @@ parser.add_argument('model_dir', type=str, help="The model directory")
 parser.add_argument("project_dir", type=str, help="The QuPath project script directory")
 parser.add_argument("python_dir", type=str, help="The python script directory containing pbi_yolo.py")
 parser.add_argument("downsample", type=float, help="The downsample value used in the WSItoJpg step")
+parser.add_argument("req_path", type=str, help="The location of the requirements.txt file")
 
 args = parser.parse_args()
 model_dir = args.model_dir
 project_dir = args.project_dir
 python_dir = args.python_dir
 downsample = args.downsample
+req_path = args.req_path
 
 env_name = "ki67"
 result = subprocess.run("conda env list", shell=True, text=True, capture_output=True)
@@ -27,7 +29,6 @@ if env_name not in result.stdout:
     # Install requirements
     failed_packages = []
 
-    req_path = "D:/Qupath-files/requirements.txt"
     with open(req_path, "r") as file:
         for package in file:
             package = package.strip()
