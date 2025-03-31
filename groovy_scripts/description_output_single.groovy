@@ -13,13 +13,15 @@ import qupath.lib.objects.*
 
 base_thresholds = [75, 69, 89]
 jgh_thresholds = [65, 55, 84]
+blur_thresh = 5
 
 try {
     
     if(args.size() > 0) {
-        def lst = args[0].split(";").collect { it.toInteger() }
-        base_thresholds = lst
-        jgh_thresholds = lst
+        def lst = args[0].split(";").collect { it.toDouble() }
+        base_thresholds = lst[0..2]
+        jgh_thresholds = lst[0..2]
+        blur_thresh = lst[3]
     }
     def name = "- Ki-67 Assessment -"
 
@@ -34,7 +36,6 @@ try {
     println imageData
 
     // Example for how to set description
-    //print Project.getEntry(imageData).setDescription("Testing number 2")
     desc = "Ki-67 Control Tissue Assessment \n"
     // code 0 OK, 1 WARN, 2 ERROR.
     code = 0
@@ -122,15 +123,17 @@ try {
     if(GC != null) {
         count = GC.getChildObjects().size()
         long area = GC.getROI().getArea()
-        ratio = 10000 * count / area
-        if(ratio < 5 && ratio > 0) {
-            desc += "WARN - Low GC Cell Density Detected; Blurred Image Likely \n"
-            code = Math.max(code, 1)
-        }else if (ratio == 0) {
-        desc += "ERROR - 0 GC Cell Detections; Likely Critical Image Blurring or InstanSeg Run Failed \n" 
-        code = Math.max(code, 2)
-        }else {
-            desc += "OK - No GC Blurriness Detected \n"       
+        if(area > 0) {
+            ratio = 10000 * count / area
+            if(ratio < blur_thresh && ratio > 0) {
+                desc += "WARN - Low GC Cell Density Detected; Blurred Image Likely \n"
+                code = Math.max(code, 1)
+            }else if (ratio == 0) {
+            desc += "ERROR - 0 GC Cell Detections; Likely Critical Image Blurring or InstanSeg Run Failed \n" 
+            code = Math.max(code, 2)
+            }else {
+                desc += "OK - No GC Blurriness Detected \n"       
+            }
         }
     }
     if(LZ != null && !lz_missing) {
@@ -138,7 +141,7 @@ try {
         long area = LZ.getROI().getArea()
         if(area > 0) {
             ratio = 10000 * count / area
-            if(ratio < 5 && ratio > 0) {
+            if(ratio < blur_thresh && ratio > 0) {
                 desc += "WARN - Low LZ Cell Density Detected; Likely Blurred Image \n"
                 code = Math.max(code, 1)
             }else if (ratio == 0) {
@@ -154,7 +157,7 @@ try {
         long area = DZ.getROI().getArea()
         if(area > 0) {
             ratio = 10000 * count / area
-            if(ratio < 5 && ratio > 0) {
+            if(ratio < blur_thresh && ratio > 0) {
                 desc += "WARN - Low DZ Cell Density Detected; Likely Blurred Image \n"
                 code = Math.max(code, 1)
             }else if (ratio == 0) {
@@ -172,35 +175,13 @@ try {
     desc += "REQUIRED - Inspect Image for Defects in Control \n" 
     }
 
-    // def qupath = QPEx.getQuPath()
-    // def project = qupath.getProject()
-    // println project
-    // println "Retrieved project: \n" + Project.getEntry(imageData)
-    // println Project.getEntry(imageData).getDescription()
-
-    // Project.getEntry(imageData).setDescription(desc)
-    // Project.getEntry(imageData).saveImageData(imageData)
-    // Project.syncChanges()
-
-    //println Project.getEntry(imageData).getID()
-    //Project.getEntry(imageData).setDescription(desc)
-    //println "retrieved desc \n" + Project.getEntry(imageData).getDescription()
-    // Project.syncChanges()
-
-    //getProject().syncChanges()
-
-    //println desc
-
-
-
     def hierarchy = imageData.getHierarchy()
 
     // Create a small annotation
     def roi = ROIs.createRectangleROI(0, 0, 0, 0, ImagePlane.getDefaultPlane())
     def annotation = PathObjects.createAnnotationObject(roi)
 
-    // Add your text as metadata
-
+    // Add text as metadata
     annotation.setName(name)
     annotation.setDescription(desc)
     annotation.setLocked(true)
