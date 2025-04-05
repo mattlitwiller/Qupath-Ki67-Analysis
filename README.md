@@ -1,8 +1,10 @@
-Project used to store files relevant for analysis of control tissue in Ki-67 slides.
+Project used to store files relevant for analysis of control tissue in Ki-67 slides, as well as all code required to automate this process with an extension.
 
 Author Matthew Litwiller
 
-Last update Feb 5 2025
+Last update April 5 2025
+
+Recommended QuPath version: [QuPath-0.6.0-rc1](https://github.com/qupath/qupath/releases/tag/v0.6.0-rc1) - launching console version will help with diagnosing problems. 
 
 # Description of folders
 
@@ -22,7 +24,7 @@ Notes:
 Contains 3 custom trained yolov11 models to detect germinal centers (GC) + mantle regions, light zone (LZ) + dark zone(DZ) regions, and tonsil + appendix tissues. 
 
 ## instanseg
-Contains instanseg models required for running instanseg. For the Ki-67 project, only the brightfield_nuclei model should be used. This can also be found online.
+Contains instanseg models required for running instanseg. For the Ki-67 project, only the brightfield_nuclei model should be used. This can also be found online. See GPU setup for InstanSeg below.
 
 ## predictions
 Contains predictions of tissue regions for various slides. 
@@ -37,6 +39,64 @@ Sub-folders of interest:
 - AllSLides2_NewModels: DAB & Positivity visualizations for entire dataset
 
 
-### Overall Notes
-- Paths are setup for my local machine and will need to be reworked
-- I did not document my own conda environment setup and this will likely require some setup
+# KI-67 Analysis Extension
+
+Ki-67 analysis can be performed project-wide using the extension developed in this repository. 
+
+## Setup:
+- Required files & folders:
+    ```
+    - groovy_scripts folder
+    - python_scripts folder
+    - models folder
+    - requirements.txt file
+    - QuPath-0.6.0-rc1 (console).exe launcher
+    Note: .exe file not included in this repo, this is installed with QuPath directly
+    ```
+- Anaconda must be installed as a python environment will be created within the extension to run the computer vision libraries required for predicting cell regions. [Download Anaconda here](https://www.anaconda.com/download)
+- Instanseg extension should be installed and setup for using GPU. [Standard download here](https://github.com/instanseg/instanseg). Steps for enabling GPU on QuPath v6-rc1 (From Ajay Rajaram & Dr. Rolf Harkes):
+```
+  1. To get the gpu option for InstaSeg (and WSInfer) working, uninstall your current CUDA (find all CUDA on Add/Remove programs and uninstall)
+  2. Restart machine
+  3. On reboot, delete the directory C:\Program Files\NVIDIA GPU Computing Toolkit
+  4. Download CUDA 12.1 here for Windows 11 or from here for Linux 
+  5. Similarly, download the recent cuDNN for CUDA 12.1 here (Windows) or here (Ubuntu 22.04)
+  6. Install CUDA 12.1; Select custom install and uncheck the graphic drivers (else it will overwrite these with older versions)
+  7. Unzip contents of cuDNN into the respective folders in C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1
+  8. You don't need conda or mamba; Just Python 3.10 or above is enough. So, you can uninstall Anaconda/Mamba, and retain Python or install Python 3.10 and above. I believe for Linux, conda will be a better option
+  9. When done, open a command prompt, and install Pytorch 2.3.1 for CUDA 12.1 by entering the following on the command prompt: pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+  10. For Linux, it can be installed using conda: conda install pytorch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 pytorch-cuda=12.1 -c pytorch -c nvidia (use the same to download PyTorch on Windows 11 if you have conda instead Python)
+  11. Now run QuPath v0.6.0-rc1 and click on Extensions>Deep Java LIbrary>Manage DJL Engine
+  12. In the DJL engines window, click on Check / Download under PyTorch, and you should see 2.3.1-cu121-win-x86_64 downloaded in the Path.
+  13. If all the above steps are done right, you will be able to select GPU in the InstanSeg window!
+```
+
+## qp_extension 
+Contains the jar file for running the KI67 extension. This should be placed within the QuPath extension folder. To locate the extension folder in QuPath, navigate to ```Extensions > Manage Extensions > Open extension directory```.
+The ki67 extension .jar file should be placed within this folder.
+
+## Extension workflow
+Once all setup is complete, the extension can be accessed via ```Extensions > Ki-67 Assessment > Run assessment```. The extension will run on all slides in a project, and a project should be open before running. Once the window is open here is an overview of the workflow:
+
+1. Extension Setup: Set file and folder destinations (& optionally save for later use)
+2. Producing YOLO Predictions: Input downsample to reduce size of images while maintaining as much detail as possible. This downsample will be used for both ```convert WSI to JPG``` and ```Perform YOLO predictions``` steps and should not vary from one run to another unless both steps are recomputed in the same run.
+3. Post-Processing:
+```
+- Filtering predictions to keep only predictions within tonsil and appendix regions
+- Combining predictions
+- Filling holes in predictions
+- Ensuring dark and light zones do not overlap
+- Removing small predictions
+- Ensuring LZ/DZ exist only within GC
+- Ensuring no mantle region overlaps with a GC
+```
+4. Stain Vectors: To customize stain vectors for stains that differ from stains used at the GLEN hospital during development of the extension. Tip: use the default QuPath tool ```Analyze > Estimate Stain Vector``` can be used to approximate a new stain vector, but may not capture the full optical density range. The stain vectors set here will have a direct effect on the DAB values of the detected cells. All vectors must be normalized.
+5. InstanSeg: Recommended to only run for light zone (LZ), dark zone (DZ) & germinal center (GC) regions as mantle expression is difficult to quantify and subject to a high degree of variability. The analysis results do not consider mantle regions for its assessment.
+6. Cell Classification: Classify cells into positive and negative based on a single threshold of the DAB values (0.15 recommended)
+7. Results: Output analysis results in an annotation for each slide. The analysis will, among others, check that the rate of positive cells within the desired regions is above the inputted values. Additionally, it checks for blurriness based on the density of detected cells over the annotation areas.
+
+# Overall Notes
+- For non-extension usage: paths were setup for my local machine and will need to be reworked.
+- For extension usage, the user will be prompted to select the location of all files except the extension .jar file and remaining paths are handled by passing arguments to the scripts.
+- For non-extension usage, I did not document my own conda environment setup and this will require some setup.
+- For extension usage, a virtual environment is created automatically provided anaconda is setup on the machine. 
