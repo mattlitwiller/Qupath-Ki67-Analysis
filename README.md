@@ -108,4 +108,4 @@ Once all setup is complete, the extension can be accessed via ```Extensions > Ki
 - For non-extension usage: paths were setup for my local machine and will need to be reworked.
 - For extension usage, the user will be prompted to select the location of all files except the extension .jar file and remaining paths are handled by passing arguments to the scripts.
 - For non-extension usage, I did not document my own conda environment setup and this will require some setup.
-- For extension usage, a virtual environment is created automatically provided anaconda is setup on the machine. 
+- For extension usage, a virtual environment can be used to run all python operations by installing all libraries in ```requirements.txt```, provided anaconda is setup on the machine. 
