@@ -31,7 +31,7 @@ Notes:
 Contains 3 custom trained yolov11 models to detect germinal centers (GC) + mantle regions, light zone (LZ) + dark zone(DZ) regions, and tonsil + appendix tissues. 
 
 ## instanseg
-Contains instanseg models required for running instanseg. For the Ki-67 project, only the brightfield_nuclei model should be used. This can also be found online. See GPU setup for InstanSeg below.
+Contains instanseg models required for running instanseg. For the Ki-67 project, only the brightfield_nuclei model should be used. This can also be found online. See GPU setup for InstanSeg [below](#setup).
 
 ## predictions
 Contains predictions of tissue regions for various slides. 
@@ -61,7 +61,7 @@ Ki-67 analysis can be performed project-wide using the extension developed in th
     Note: .exe file not included in this repo, this is installed with QuPath directly
     ```
 - Anaconda must be installed as a python environment will be created within the extension to run the computer vision libraries required for predicting cell regions. [Download Anaconda here](https://www.anaconda.com/download)
-- Instanseg extension should be installed and setup for using GPU. [Standard download here](https://github.com/instanseg/instanseg). Steps for enabling GPU on QuPath v6-rc1 (From Ajay Rajaram & Dr. Rolf Harkes):
+- Instanseg extension should be installed and setup for using GPU. [Standard download here](https://github.com/instanseg/instanseg). Enabling GPU will greatly increase processing speed. Steps for enabling GPU on QuPath v6-rc1 (From Ajay Rajaram & Dr. Rolf Harkes):
 ```
   1. To get the gpu option for InstaSeg (and WSInfer) working, uninstall your current CUDA (find all CUDA on Add/Remove programs and uninstall)
   2. Restart machine
@@ -104,6 +104,7 @@ Once all setup is complete, the extension can be accessed via ```Extensions > Ki
 
 # Notes
 - All code was developed on windows using Nvidia GPUs with cuda cores
+- Extension code was developed using [jdk21](https://adoptium.net/) but works with other versions, such as jdk17. 
 - For non-extension usage: paths were setup for my local machine and will need to be reworked.
 - For extension usage, the user will be prompted to select the location of all files except the extension .jar file and remaining paths are handled by passing arguments to the scripts.
 - For non-extension usage, I did not document my own conda environment setup and this will require some setup.
