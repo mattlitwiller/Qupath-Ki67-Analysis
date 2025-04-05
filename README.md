@@ -1,3 +1,10 @@
+# Overview
+
+Main sections:
+- [Description of Folders](#description-of-folders)
+- [KI-67 Analysis Extension](#ki-67-analysis-extension)
+- [Notes](#notes)
+
 Project used to store files relevant for analysis of control tissue in Ki-67 slides, as well as all code required to automate this process with an extension.
 
 Author Matthew Litwiller
@@ -6,7 +13,7 @@ Last update April 5 2025
 
 Recommended QuPath version: [QuPath-0.6.0-rc1](https://github.com/qupath/qupath/releases/tag/v0.6.0-rc1) - launching console version will help with diagnosing problems. 
 
-# Description of folders
+# Description of Folders
 
 ## groovy_scripts
 Used to store all groovy scripts relevant to the project, both useful for model generation and for post-processing & outputting results in QuPath. All groovy scripts can be used from the QuPath CLI. 
@@ -95,7 +102,8 @@ Once all setup is complete, the extension can be accessed via ```Extensions > Ki
 6. Cell Classification: Classify cells into positive and negative based on a single threshold of the DAB values (0.15 recommended)
 7. Results: Output analysis results in an annotation for each slide. The analysis will, among others, check that the rate of positive cells within the desired regions is above the inputted values. Additionally, it checks for blurriness based on the density of detected cells over the annotation areas.
 
-# Overall Notes
+# Notes
+- All code was developed on windows using Nvidia GPUs with cuda cores
 - For non-extension usage: paths were setup for my local machine and will need to be reworked.
 - For extension usage, the user will be prompted to select the location of all files except the extension .jar file and remaining paths are handled by passing arguments to the scripts.
 - For non-extension usage, I did not document my own conda environment setup and this will require some setup.
