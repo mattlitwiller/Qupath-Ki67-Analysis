@@ -76,10 +76,10 @@ for detection_class, size in model_folders.items():
             file_path = os.path.join(image_paths, file)
             file_name, _ = os.path.splitext(file)
             
-            # Execute the Python script with parameters
+            # Execute the Python script with parameters in the ki67 conda environment
             subprocess.run([
-                "python", f"{python_dir}/pbi_yolo.py", 
-                f"{file_name}.jpg", detection_class, 
+                "conda", "run", "--name", "ki67", "python", 
+                f"{python_dir}/pbi_yolo.py", f"{file_name}.jpg", detection_class, 
                 str(downsample), str(size), 
                 str(model_dir), str(project_dir), str(python_dir),
                 "--batch_folder", batch_folder
