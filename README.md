@@ -66,8 +66,8 @@ Ki-67 analysis can be performed project-wide using the extension developed in th
   1. To get the gpu option for InstaSeg (and WSInfer) working, uninstall your current CUDA (find all CUDA on Add/Remove programs and uninstall)
   2. Restart machine
   3. On reboot, delete the directory C:\Program Files\NVIDIA GPU Computing Toolkit
-  4. Download CUDA 12.1 here for Windows 11 or from here for Linux 
-  5. Similarly, download the recent cuDNN for CUDA 12.1 here (Windows) or here (Ubuntu 22.04)
+  4. Download CUDA 12.1 (see resources below) 
+  5. Similarly, download the recent cuDNN for CUDA 12.1 (see resources below)
   6. Install CUDA 12.1; Select custom install and uncheck the graphic drivers (else it will overwrite these with older versions)
   7. Unzip contents of cuDNN into the respective folders in C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1
   8. You don't need conda or mamba; Just Python 3.10 or above is enough. So, you can uninstall Anaconda/Mamba, and retain Python or install Python 3.10 and above. I believe for Linux, conda will be a better option
@@ -77,6 +77,15 @@ Ki-67 analysis can be performed project-wide using the extension developed in th
   12. In the DJL engines window, click on Check / Download under PyTorch, and you should see 2.3.1-cu121-win-x86_64 downloaded in the Path.
   13. If all the above steps are done right, you will be able to select GPU in the InstanSeg window!
 ```
+Resources from steps 4-5 can be found here:
+
+Windows 11 CUDA 12.1 [here](https://developer.nvidia.com/cuda-12-1-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local)
+
+Linux CUDA 12.1 [here](https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdeveloper.nvidia.com%2Fcuda-12-1-0-download-archive%3Ftarget_os%3DLinux%26target_arch%3Dx86_64%26Distribution%3DUbuntu%26target_version%3D22.04&data=05%7C02%7Cmatthew.litwiller%40mail.mcgill.ca%7C6a293d555c854543b0c208dcd7fd710e%7Ccd31967152e74a68afa9fcf8f89f09ea%7C0%7C0%7C638622730752864248%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=FF6gnSwFzh09HeHKsCSrhKCTfKKqDv%2FSwQ3GZNH%2BW70%3D&reserved=0)
+
+Windows cuDNN for CUDA 12.1 [here](https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdeveloper.nvidia.com%2Fdownloads%2Fcompute%2Fcudnn%2Fsecure%2F8.9.7%2Flocal_installers%2F12.x%2Fcudnn-windows-x86_64-8.9.7.29_cuda12-archive.zip%2F&data=05%7C02%7Cmatthew.litwiller%40mail.mcgill.ca%7C6a293d555c854543b0c208dcd7fd710e%7Ccd31967152e74a68afa9fcf8f89f09ea%7C0%7C0%7C638622730752879932%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=rr7%2Beai1dBErCKplHq999ymrlWzY5i8IlxpGW47GlN4%3D&reserved=0)
+
+Ubuntu 22.04 cuDNN for CUDA 12.1 [here](https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdeveloper.nvidia.com%2Fdownloads%2Fcompute%2Fcudnn%2Fsecure%2F8.9.7%2Flocal_installers%2F12.x%2Fcudnn-local-repo-ubuntu2204-8.9.7.29_1.0-1_amd64.deb%2F&data=05%7C02%7Cmatthew.litwiller%40mail.mcgill.ca%7C6a293d555c854543b0c208dcd7fd710e%7Ccd31967152e74a68afa9fcf8f89f09ea%7C0%7C0%7C638622730752895830%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=m8lYblJaTO5sy7AzmXihknx%2Bp1buUwxcive64%2F8NeMU%3D&reserved=0)
 
 ## qp_extension 
 Contains the jar file for running the KI67 extension. This should be placed within the QuPath extension folder. To locate the extension folder in QuPath, navigate to ```Extensions > Manage Extensions > Open extension directory```.
