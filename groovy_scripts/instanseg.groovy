@@ -46,7 +46,10 @@ for (anno in annotations) {
 // Select all desired objects before running instaseg
 selectObjects(pathObjects)
 println("model path '" + model_path + "'")
-qupath.ext.instanseg.core.InstanSeg.builder()
+System.properties["ai.djl.offline"] = "false"
+
+try {
+    qupath.ext.instanseg.core.InstanSeg.builder()
     .modelPath(model_path)
     .device(device)
     .nThreads(threads)
@@ -61,3 +64,7 @@ qupath.ext.instanseg.core.InstanSeg.builder()
     .randomColors(randomColors)
     .build()
     .detectObjects()
+}catch(Exception e) {
+    e.printStackTrace()
+    // System.exit(1)
+}
