@@ -111,7 +111,7 @@ annotations <- lapply(1:nrow(stdev_by_region_hospital_df), function(i) {
 p <- p %>% layout(
   title = "Non-Zero Slide Cell Positivity by Region and Hospital (DAB threshold = 0.15)",
   xaxis = list(
-    title = "Slide Region - Hospital",
+    title = "Slide Region",
     tickvals = unique(pos_measurements$RegionHospitalNumeric),
     ticktext = unique(pos_measurements$Region_Hospital)),
   yaxis = list(title = "Slide Region Positivity (%)"),
@@ -151,11 +151,171 @@ num_unique_slides_glen <- length(unique(glen_data$Slide))
 
 
 
+# Filter pos_measurements for GLEN only
+glen_df <- pos_measurements[grepl("GLEN", pos_measurements$Region_Hospital) & 
+                              !grepl("JGH", pos_measurements$Region_Hospital), ]
+
+# Filter stdev_by_region_hospital_df for GLEN only
+glen_stdev_df <- stdev_by_region_hospital_df[grepl("GLEN", stdev_by_region_hospital_df$Region_Hospital) & 
+                                               !grepl("JGH", stdev_by_region_hospital_df$Region_Hospital), ]
+
+
+
+# Start from unique_filtered_df_zeroes
+glen_zero_df <- unique_filtered_df_zeroes[!grepl("J", unique_filtered_df_zeroes$Slide), ]
+
+# Assign RegionHospitalNumeric
+glen_zero_df$RegionHospitalNumeric <- ifelse(
+  glen_zero_df$Region == "dark_zone", 1,
+  ifelse(glen_zero_df$Region == "light_zone", 5,
+         ifelse(glen_zero_df$Region == "germinal_center", 3, NA))
+)
+
+# Assign matching colors
+glen_zero_df$Color <- region_colors[glen_zero_df$Region]
+
+
+# Add Hospital, Region_Hospital
+glen_zero_df$Hospital <- "GLEN"
+# glen_zero_df$Region_Hospital <- paste(glen_zero_df$Region, glen_zero_df$Hospital, sep = "_")
+glen_zero_df$Region_Hospital <- paste(tools::toTitleCase(gsub("_", " ", glen_zero_df$Region)), glen_zero_df$Hospital, sep = " - ")
+
+# Assign RegionMean = 0
+glen_zero_df$RegionMean <- 0
+
+# Assign offset = 0
+glen_zero_df$offset <- 0
+
+# Match Stdev from glen_df by RegionHospitalNumeric
+region_stdevs <- tapply(glen_data$Stdev, glen_data$RegionHospitalNumeric, function(x) unique(x)[1])
+glen_zero_df$Stdev <- region_stdevs[as.character(glen_zero_df$RegionHospitalNumeric)]
+
+# Ensure column order matches glen_df
+glen_zero_df <- glen_zero_df[, names(glen_data)]
+
+
+# Assign RegionMean based on Region_Hospital
+glen_zero_df$RegionMean <- glen_stdev_df$RegionMean[match(glen_zero_df$Region_Hospital, glen_stdev_df$Region_Hospital)]
+
+
+# Append to glen_df
+glen_df_with_zeros <- rbind(glen_data, glen_zero_df)
+
+# Determine threshold for each row
+glen_df_with_zeros$LowerThreshold <- glen_df_with_zeros$RegionMean - 2 * glen_df_with_zeros$Stdev
+
+# Mark rows as below threshold
+glen_df_with_zeros$BelowThreshold <- glen_df_with_zeros$Positivity < glen_df_with_zeros$LowerThreshold
+
+# Assign marker symbol: 'x' for below threshold, 'circle' otherwise
+glen_df_with_zeros$MarkerSymbol <- ifelse(glen_df_with_zeros$BelowThreshold, 'x', 'circle')
+
+
+
+# Create the GLEN-only scatter plot
+p <- plot_ly(
+  data = glen_df_with_zeros, 
+  x = ~RegionHospitalNumeric, 
+  y = ~Positivity, 
+  type = 'scatter', 
+  mode = 'markers',
+  name = ~Region,
+  text = ~paste("Slide: ", Slide,
+                "<br>Hospital: ", Hospital, 
+                "<br>Positivity: ", round(Positivity, 2), "%",
+                "<br>Count: ", Count),
+  hoverinfo = 'text',
+  marker = list(
+    color = ~Color, 
+    size = 8,
+    symbol = ~MarkerSymbol  # ← key part here
+  )
+)
+# Add mean and error bars (GLEN only)
+p <- p %>% add_trace(
+  data = glen_stdev_df,
+  x = ~RegionHospitalNumeric + offset,
+  y = ~RegionMean,
+  type = 'scatter', 
+  mode = 'markers',
+  marker = list(color = 'black', size = 10, symbol = 'o'),
+  name = "Region Mean",
+  text = ~paste("Region: ", Region_Hospital,
+                "<br>Mean: ", round(RegionMean, 2), "%", 
+                "<br>Stdev: ", round(Stdev, 2)),
+  hoverinfo = 'text',
+  error_y = list(
+    type = 'data',
+    array = ~Stdev,
+    visible = TRUE,
+    color = 'black',
+    line = list(color = 'black')
+  )
+)
+# Create annotations for GLEN-only region means
+annotations <- lapply(1:nrow(glen_stdev_df), function(i) {
+  list(
+    x = glen_stdev_df$RegionHospitalNumeric[i] + offset * 2,
+    y = glen_stdev_df$RegionMean[i],
+    text = paste(round(glen_stdev_df$RegionMean[i], 2), "%", 
+                 "<br>+/- ", round(glen_stdev_df$Stdev[i], 2)),
+    showarrow = FALSE,
+    font = list(size = 10, weight = 'bold'),
+    align = "left"
+  )
+})
+p <- p %>% layout(
+  title = "Cell Positivity Above and Below 2 Stdev by Region (GLEN Only, DAB threshold = 0.15)",
+  xaxis = list(
+    title = "Slide Region",
+    tickvals = unique(glen_df_with_zeros$RegionHospitalNumeric),
+    ticktext = unique(glen_df_with_zeros$Region_Hospital)),
+  yaxis = list(title = "Slide Region Positivity (%)"),
+  hovermode = "closest",
+  annotations = annotations,
+  showlegend = FALSE
+)
+
+# Show the plot
+p
+
+
+
+# Compute threshold per region
+glen_df_with_zeros$LowerThreshold <- glen_df_with_zeros$RegionMean - 2 * glen_df_with_zeros$Stdev
+
+# Determine if each row is below threshold
+glen_df_with_zeros$BelowThreshold <- glen_df_with_zeros$Positivity < glen_df_with_zeros$LowerThreshold
+
+# Determine which slides have ANY region below the threshold
+slide_flags <- aggregate(BelowThreshold ~ Slide, data = glen_df_with_zeros, FUN = any)
+
+# Count how many slides are below vs not below
+pie_data <- data.frame(
+  Category = c("1+ Region Below 2 Stdev", "All Regions Above or Equal to 2 Stdev"),
+  Count = c(sum(slide_flags$BelowThreshold), sum(!slide_flags$BelowThreshold))
+)
+
+# Plot pie chart
+pie_chart <- plot_ly(
+  data = pie_data,
+  labels = ~Category,
+  values = ~Count,
+  type = 'pie',
+  textinfo = 'label+percent',
+  marker = list(colors = c("#e74c3c", "#2ecc71"))  # red and green
+) %>%
+  layout(title = "GLEN Slides With Any Region Below 2 Stdev of Region Mean (DAB threshold = 0.15)")
+
+pie_chart
+
+
+
+
+
+
 ### Different categories
 # 1. Blurry images: mantle region tends to be high
 # 2. Lack of staining: DZ/LZ tend to have low positivity
 # 3. Small sample size: can skew results any direction
 # 4. 
-#
-#
-#
