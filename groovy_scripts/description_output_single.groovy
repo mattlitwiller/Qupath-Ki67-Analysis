@@ -11,8 +11,10 @@
 import qupath.lib.gui.scripting.QPEx
 import qupath.lib.objects.*
 
-base_thresholds = [75, 69, 89]
-jgh_thresholds = [65, 55, 84]
+// lz, gc, dz
+classes = ["light_zone", "germinal_center", "dark_zone"]
+base_thresholds = [69, 75, 89]
+jgh_thresholds = [55, 65, 84]
 blur_thresh = 5
 
 try {
@@ -22,6 +24,7 @@ try {
         base_thresholds = lst[0..2]
         jgh_thresholds = lst[0..2]
         blur_thresh = lst[3]
+        println base_thresholds
     }
     def name = "- Ki-67 Assessment -"
 
@@ -81,8 +84,6 @@ try {
     }
 
     // 3. Positivity of LZ/DZ/GC within threshold
-    classes = ["germinal_center", "light_zone", "dark_zone"]
-
     dets = getDetectionObjects()
     slide = GeneralTools.stripExtension(getCurrentImageData().getServer().getMetadata().getName())
     jgh = slide.contains("J")  // find if JGH slide or not
@@ -95,26 +96,27 @@ try {
         region_dets_count = region_dets.size()
         pos_region_dets = region_dets.findAll {it.getPathClass().toString().equals("Positive")}
         pos_region_dets_count = pos_region_dets.size()
-        pos = 100 * pos_region_dets_count / Math.max(region_dets_count, 1)
+        pos = Math.ceil(100 * pos_region_dets_count / Math.max(region_dets_count, 1)) as int
+        println base_thresholds[i]
         if(jgh) {
             if(1.1 * pos < jgh_thresholds[i]) {
-                desc += "ERROR - " + c + " Positivity Far Below Threshold \n"
+                desc += "ERROR - " + c + " Positivity (" + pos + "%) Far Below Threshold \n"
                 code = Math.max(code, 2)
             }else if(pos < jgh_thresholds[i]) {
-                desc += "WARN - " + c + " Positivity Slightly Below Threshold \n"
+                desc += "WARN - " + c + " Positivity (" + pos + "%) Slightly Below Threshold \n"
                 code = Math.max(code, 1)
             }else {
-                desc += "OK - " + c + " Positivity Above Accepted \n"
+                desc += "OK - " + c + " Positivity (" + pos + "%) Above Accepted \n"
             }
         }else {
             if(1.1 * pos < base_thresholds[i]) {
-                desc += "ERROR - " + c + " Positivity Far Below Threshold \n"
+                desc += "ERROR - " + c + " Positivity (" + pos + "%) Far Below Threshold \n"
                 code = Math.max(code, 2)
             }else if(pos < base_thresholds[i]) {
-                desc += "WARN - " + c + " Positivity Slightly Below Threshold \n"
+                desc += "WARN - " + c + " Positivity (" + pos + "%) Slightly Below Threshold \n"
                 code = Math.max(code, 1)
             }else {
-                desc += "OK - " + c + " Positivity Above Accepted \n"
+                desc += "OK - " + c + " Positivity (" + pos + "%) Above Accepted \n"
             }
         }
     }
