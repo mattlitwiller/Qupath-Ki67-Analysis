@@ -9,7 +9,7 @@ Project used to store files relevant for analysis of control tissue in Ki-67 sli
 
 Author Matthew Litwiller
 
-Last update April 5 2025
+Last update April 29 2025
 
 Recommended QuPath version: [QuPath-0.6.0-rc1](https://github.com/qupath/qupath/releases/tag/v0.6.0-rc1) - launching console version will help with diagnosing problems. 
 
@@ -56,6 +56,7 @@ Ki-67 analysis can be performed project-wide using the extension developed in th
     - groovy_scripts folder
     - python_scripts folder
     - models folder
+    - ki67-assessment-0.1.0-SNAPSHOT-all.jar extension file
     - requirements.txt file
     - QuPath-0.6.0-rc1 (console).exe launcher
     Note: .exe file not included in this repo, this is installed with QuPath directly
