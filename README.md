@@ -111,7 +111,7 @@ Once all setup is complete, the extension can be accessed via ```Extensions > Ki
 5. InstanSeg: Recommended to only run for light zone (LZ), dark zone (DZ) & germinal center (GC) regions as mantle expression is difficult to quantify and subject to a high degree of variability. The analysis results do not consider mantle regions for its assessment.
 6. Cell Classification: Classify cells into positive and negative based on a single threshold of the DAB values (0.15 recommended)
 7. Results: Output analysis results in an annotation for each slide. The analysis will, among others, check that the rate of positive cells within the desired regions is above the inputted values. Additionally, it checks for blurriness based on the density of detected cells over the annotation areas.
-8. Export: Used to export analysis results in a csv file for visualizations (e.g. with Power BI). Useful for quality assessment over time in a Levey-Jennings graph or other. 
+8. Export for Power BI: Used to export analysis results in a csv file for visualizations (e.g. with Power BI). Useful for quality assessment over time in a Levey-Jennings graph or other. 
 
 # Notes
 - All code was developed on windows using Nvidia GPUs with cuda cores
