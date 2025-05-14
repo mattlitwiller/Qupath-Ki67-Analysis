@@ -117,6 +117,6 @@ Once all setup is complete, the extension can be accessed via ```Extensions > Ki
 - All code was developed on windows using Nvidia GPUs with cuda cores
 - Extension code was developed using [jdk21](https://adoptium.net/) but works with other versions, such as jdk17. 
 - For non-extension usage: paths were setup for my local machine and will need to be reworked.
-- For extension usage, the user will be prompted to select the location of all files except the extension .jar file and remaining paths are handled by passing arguments to the scripts.
+- For extension usage, the user will be prompted to select the location of all files except the extension .jar file and remaining paths are handled by passing arguments to the scripts. Paths should not have spaces
 - For non-extension usage, I did not document my own conda environment setup and this will require some setup.
 - For extension usage, a virtual environment can be used to run all python operations by installing all libraries in ```requirements.txt```, provided anaconda is setup on the machine. There is a GUI for this in the extension. 
