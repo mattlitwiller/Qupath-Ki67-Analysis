@@ -44,6 +44,7 @@ Somewhat unorganized folder with cell data & data analysis using R. Rstudio 2024
 Sub-folders of interest:
 - GlenDilution: used for glen dilution series
 - AllSLides2_NewModels: DAB & Positivity visualizations for entire dataset
+- levey-jennings.pbit (file): Power BI template for plotting cell data over time based on extension outputs (see wiki for visualization example)
 
 
 # KI-67 Analysis Extension
